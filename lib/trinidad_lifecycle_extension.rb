@@ -1,12 +1,9 @@
-require 'rubygems'
-gem 'trinidad_jars'
-require 'trinidad/extensions'
-require 'java'
+require 'trinidad'
+require 'trinidad_lifecycle_extension/version'
 
 module Trinidad
   module Extensions
     module Lifecycle
-      VERSION = '0.2.2'
 
       def init_listeners(context, path, mod_name)
         path ||= File.join('lib', 'lifecycle')
@@ -33,8 +30,8 @@ module Trinidad
         trap('INT') { tomcat.stop }
         trap('TERM') { tomcat.stop }
       end
+      
     end
-
 
     class LifecycleServerExtension < ServerExtension
       include Lifecycle
