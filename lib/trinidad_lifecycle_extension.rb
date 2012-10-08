@@ -18,9 +18,9 @@ module Trinidad
           listeners.map! do |name|
             const = self.const_get(name)
             if const.is_a?(Class) && const.included_modules.include?(Listener)
+              const.new
+            elsif const.is_a?(Listener)
               const
-            else
-              nil
             end
           end
           listeners.compact
@@ -38,10 +38,10 @@ module Trinidad
       def init_listeners(container, path, base_mod)
         path ||= File.join('lib', 'lifecycle')
 
-        Dir.glob("#{path}/*.rb").each { |rb| load rb }
+        Dir.glob("#{path}/*.rb").each { |rb| require rb }
 
-        base_mod.listeners.each do |listener_class|
-          container.add_lifecycle_listener listener_class.new
+        base_mod.listeners.each do |listener|
+          container.add_lifecycle_listener listener
         end
       end
       

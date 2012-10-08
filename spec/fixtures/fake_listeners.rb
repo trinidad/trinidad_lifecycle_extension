@@ -12,6 +12,8 @@ module Trinidad
         
       end
       
+      USER_CONFIG = org.apache.catalina.startup.UserConfig
+      
     end
     module WebApp
       
@@ -25,6 +27,8 @@ module Trinidad
         end
         
       end
+      
+      SECURITY = org.apache.catalina.security.SecurityListener.new
       
     end
   end

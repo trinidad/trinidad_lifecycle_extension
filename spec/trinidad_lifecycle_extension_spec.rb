@@ -15,7 +15,7 @@ describe 'trinidad lifecycle extension' do
 
     it "adds the listener to the tomcat's server context" do
       subject.configure(tomcat)
-      tomcat.server.findLifecycleListeners().should have(1).listener
+      tomcat.server.findLifecycleListeners().should have(2).listener
     end
     
   end
@@ -26,7 +26,7 @@ describe 'trinidad lifecycle extension' do
 
     it "adds the listener to the application context" do
       subject.configure(tomcat, context)
-      context.findLifecycleListeners().should have(1).listener
+      context.findLifecycleListeners().should have(2).listener
     end
     
   end
