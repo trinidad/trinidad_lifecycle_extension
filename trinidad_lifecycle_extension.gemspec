@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.files = `git ls-files`.split("\n")
   s.test_files = s.files.select { |path| path =~ /^spec\/*_spec\.rb/ }
 
-  s.add_dependency('trinidad', '>= 1.3.5')
+  s.add_dependency('trinidad', '>= 1.4.1')
   s.add_development_dependency('rake')
   s.add_development_dependency('rspec', '>= 2.8.0')
   s.add_development_dependency('mocha')

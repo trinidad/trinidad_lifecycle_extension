@@ -31,7 +31,7 @@ the path to the directory where the listener .rb files are located e.g. :
   # ...
   extensions:
     lifecycle:
-      path: 'lib/lifecycle' # defaults to lib/lifecycle
+      listeners_path: 'lib/lifecycle' # defaults to lib/lifecycle
 ```
 
 Trinidad will try to require the *.rb files from the lifecycle directory and 
@@ -87,6 +87,23 @@ module Trinidad
 end
 ```
 
+Of you may sub-class them and perform desired setup when instantiated :
+
+```ruby
+module Trinidad
+  module Lifecycle
+    module Server
+      class SimpleCluster < org.apache.catalina.ha.tcp.SimpleTcpCluster
+        def initialize
+          setClusterName('Trinidad')
+        end
+      end
+    end
+  end
+end
+```
+
+
 ### WebApp Lifecycle Listener
 
 The very same rulez apply as for the Server Listener above except that we add
@@ -119,15 +136,16 @@ Lifecycle listeners might be exported as configured instances as well e.g. :
 ```ruby
 module Trinidad
   module Lifecycle
-    module Server
+    module WebApp
       
-      def self.configure_cluster
-        cluster = org.apache.catalina.ha.tcp.SimpleTcpCluster.new
-        cluster.setClusterName('Trinidad')
-        cluster
+      def self.configure_jre_memory_leak_prevention_listener
+        listener = org.apache.catalina.core.JreMemoryLeakPreventionListener.new
+        listener.setGcDaemonProtection(true)
+        listener.setUrlCacheProtection(true)
+        listener
       end
 
-      CONFIGURED_CLUSTER = self.configure_cluster
+      MEMORY_LEAK_LISTENER = self.configure_jre_memory_leak_prevention_listener
 
     end
   end
