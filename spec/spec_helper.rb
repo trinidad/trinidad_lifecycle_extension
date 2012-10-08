@@ -5,9 +5,9 @@ rescue LoadError
   require 'trinidad'
 end
 
-require 'spec'
+require 'rspec'
 
-Spec::Runner.configure do |config| 
+RSpec.configure do |config|
   config.mock_with :mocha
 end
 
