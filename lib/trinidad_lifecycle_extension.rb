@@ -2,33 +2,47 @@ require 'trinidad'
 require 'trinidad_lifecycle_extension/version'
 
 module Trinidad
+  module Lifecycle
+    
+    Listener = Trinidad::Tomcat::LifecycleListener
+    
+    module Server; end
+    module WebApp; end
+    
+    [ Server, WebApp ].each do |mod|
+      mod.module_eval do
+        @@_constants = self.constants.dup
+
+        def self.listeners
+          listeners = self.constants - @@_constants
+          listeners.map! do |name|
+            const = self.const_get(name)
+            if const.is_a?(Class) && const.included_modules.include?(Listener)
+              const
+            else
+              nil
+            end
+          end
+          listeners.compact
+        end
+      end
+    end
+    
+  end
+  
   module Extensions
     module Lifecycle
 
-      def init_listeners(context, path, mod_name)
+      private
+      
+      def init_listeners(container, path, base_mod)
         path ||= File.join('lib', 'lifecycle')
 
-        Dir.glob("#{path}/*.rb").each do |listener|
-          load listener
+        Dir.glob("#{path}/*.rb").each { |rb| load rb }
+
+        base_mod.listeners.each do |listener_class|
+          container.add_lifecycle_listener listener_class.new
         end
-
-        mod = constantize(mod_name)
-        return unless mod
-
-        mod.constants.each do |listener|
-          const_listener = mod.const_get(listener)
-          context.add_lifecycle_listener(const_listener.new)
-        end
-      end
-
-      def constantize(mod)
-        names = mod.split('::')
-        names.inject(Object) {|constant, obj| constant.const_get(obj) } rescue nil
-      end
-
-      def trap_signals(tomcat)
-        trap('INT') { tomcat.stop }
-        trap('TERM') { tomcat.stop }
       end
       
     end
@@ -37,18 +51,18 @@ module Trinidad
       include Lifecycle
 
       def configure(tomcat)
-        trap_signals(tomcat)
-        init_listeners(tomcat.server, @options[:path], 'Trinidad::Lifecycle::Server')
+        init_listeners(tomcat.server, @options[:path], Trinidad::Lifecycle::Server)
       end
+      
     end
 
     class LifecycleWebAppExtension < WebAppExtension
       include Lifecycle
 
-      def configure(tomcat, app_context)
-        trap_signals(tomcat)
-        init_listeners(app_context, @options[:path], 'Trinidad::Lifecycle::WebApp')
+      def configure(tomcat, context)
+        init_listeners(context, @options[:path], Trinidad::Lifecycle::WebApp)
       end
+      
     end
 
     class LifecycleOptionsExtension < OptionsExtension
@@ -57,5 +71,6 @@ module Trinidad
         default_options[:extensions][:lifecycle] = {}
       end
     end
+    
   end
 end
