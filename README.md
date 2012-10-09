@@ -2,11 +2,14 @@
 
 This extension allows you to add lifecycle listeners (written in ruby) to the 
 [Trinidad](https://github.com/trinidad/trinidad/) server container as well as to
-each deployed web application context running on top of Trinidad.
+deployed web application contexts running on top of it.
 
-This extension also allows to enable the JMX monitoring capabilities of Tomcat.
-The configuration that Tomcat needs can be set as JAVA_OPTS properties or
-through the Trinidad's configuration file.
+This extension no longer bundles the **catalina-jmx-remote.jar** and thus for
+configuring remote JMX monitoring capabilities using the `JmxRemoteLifecycleListener`
+you will need to provide and load the Java class (e.g. by downloading and 
+loading the .jar). Alternatively, there's a separate 
+[trinidad_jmx_remote_extension](http://github.com/kares/trinidad_jmx_remote_extension)
+for enabling JMX with SSH if that's all you're looking for here.
 
 ## Install
 
@@ -31,7 +34,7 @@ the path to the directory where the listener .rb files are located e.g. :
   # ...
   extensions:
     lifecycle:
-      listeners_path: 'lib/lifecycle' # defaults to lib/lifecycle
+      listeners_path: "lib/lifecycle" # defaults to lib/lifecycle
 ```
 
 Trinidad will try to require the *.rb files from the lifecycle directory and 
@@ -81,7 +84,7 @@ they will be instantiated and configured as listeners e.g. :
 module Trinidad
   module Lifecycle
     module Server
-      SIMPLE_CLUSTER = org.apache.catalina.ha.tcp.SimpleTcpCluster
+      SECURITY_SETUP = org.apache.catalina.security.SecurityListener
     end
   end
 end
@@ -93,9 +96,9 @@ Of you may sub-class them and perform desired setup when instantiated :
 module Trinidad
   module Lifecycle
     module Server
-      class SimpleCluster < org.apache.catalina.ha.tcp.SimpleTcpCluster
+      class UserSecurity < org.apache.catalina.security.SecurityListener
         def initialize
-          setClusterName('Trinidad')
+          setCheckedOsUsers('root,public,nobody')
         end
       end
     end
@@ -106,7 +109,7 @@ end
 
 ### WebApp Lifecycle Listener
 
-The very same rulez apply as for the Server Listener above except that we add
+The very same rules apply as for the Server listeners above except that we add
 listener classes under the `Trinidad::Lifecycle::WebApp` module e.g. :
 
 ```ruby
@@ -131,7 +134,7 @@ module Trinidad
 end
 ```
 
-Lifecycle listeners might be exported as configured instances as well e.g. :
+Lifecycle listeners might be exported as (configured) instances as well e.g. :
 
 ```ruby
 module Trinidad

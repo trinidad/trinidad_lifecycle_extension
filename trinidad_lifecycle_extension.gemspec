@@ -7,8 +7,10 @@ Gem::Specification.new do |s|
   s.version           = Trinidad::Extensions::Lifecycle::VERSION
   s.rubyforge_project = 'trinidad_lifecycle_extension'
 
-  s.summary     = "Add lifecycle listeners to Trinidad"
-  s.description = "Add lifecycle listeners to Trinidad's server or the web applications that run on it."
+  s.summary     = "Lifecycle Listeners for Trinidad"
+  s.description = "This extension allows you to add lifecycle listeners to " + 
+    "Trinidad's server container as well as to deployed web application " + 
+    "contexts running on top of it."
 
   s.authors  = ["David Calavera"]
   s.email    = 'calavera@apache.org'
